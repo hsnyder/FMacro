@@ -4,8 +4,8 @@ FMacro is a macro-focused preprocessor for Fortran.
 (Actually, it's currently an empty repository, but it will eventually be a preprocessor).
 
 *Why?*
-Modern Fortran is a very nice language, but one of it's shortcomings is the lack of generic programming support. 
-C gets around this issue through it's very capable preprocessor. 
+Modern Fortran is a very nice language, but one of its shortcomings is the lack of generic programming support. 
+C gets around this issue through its very capable preprocessor. 
 Fortran does not have a standard preprocessor. 
 Many compilers permit the use of the C preprocessor in Fortran code, but unfortunately the implementation is not
 very consistent across different compilers, once you start looking at the details like macro argument concatenation
