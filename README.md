@@ -129,7 +129,7 @@ The command `!%resetcounter` can be used to reset the value of `$COUNTER` to 1.
 
 ### Undefining macros
 
-Any user-defined macro can be undefined with `!%undef` folled by the macro name.
+Any user-defined macro can be undefined with `!%undef` followed by the macro name.
 
 ### Including macros from another file
 
