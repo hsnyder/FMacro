@@ -1,6 +1,7 @@
 # FMacro
 
-FMacro is a macro-focused preprocessor for Fortran. 
+FMacro is a macro-focused preprocessor for Fortran.  
+(Actually, it's currently an empty repository, but it will eventually be a preprocessor).
 
 *Why?*
 Modern Fortran is a very nice language, but one of it's shortcomings is the lack of generic programming support. 
