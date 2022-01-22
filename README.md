@@ -84,7 +84,7 @@ The use of the `procedure` keyword is supported for this purpose.
 
 ## Current Limitations
 
-- Source file lines must be shorter than 256 characters (note this is will in excess of what the Fortran standard allows).
+- Source file lines must be shorter than 256 characters (note this is well in excess of what the Fortran standard allows).
 - A maximum of 10,000 types is supported in a single type file.
 - A maximum of 100,000 source lines is supported per template block.
 - Source files containing ASCII character codes 26 or 30 will badly confuse the parser (though it would be rather odd to have those characters in your Fortran source file).
