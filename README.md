@@ -7,6 +7,8 @@ FtnTemple aims to solve this through the use of a simple preprocessor,
 modeled after some of the language committee's early ideas for a 
 template language feature, to be included in a future Fortran standard. 
 
+*Warning:* FtnTemple is currently alpha software.
+
 ## Feature Summary
 
 Command line usage: `ftntemple [typefile] inputfile`, where `inputfile` is a fortran source file containing 
