@@ -5,10 +5,14 @@ module m_ftntemple
         integer, parameter :: line_max_length = 256 
         integer, parameter :: max_types = 10000
         integer, parameter :: max_template_lines = 100000
+
         integer, parameter :: notfound = line_max_length + 1
 
         character(len=*), parameter :: validchars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
 
+        ! when we record a template, we substitute any type symbol occurences (e.g. `type(T)`) with ASCII char 26
+        ! this makes it easier to render out the template instance (just search and replace a single char)
+        ! we also mark the end of the 'subroutine', 'procedure' or 'function' keyword with ASCII char 30 for a similar reason
         character, parameter :: substitute = achar(26)
         character, parameter :: recordsep  = achar(30)
 
@@ -25,7 +29,7 @@ module m_ftntemple
 contains
         subroutine remove_brackets(instr, outstr)
                 ! Convert parentheses to underscores
-                ! output str must have at least the length of the input str
+                ! Contract: output str must have at least the length of the input str
                 character(len=*), intent(in) :: instr
                 character(len=*), intent(out) :: outstr
 
@@ -40,7 +44,11 @@ contains
         end subroutine
 
         integer function ci_index(string, substring)
-                ! Case insensitive subset of the functionality provided by the index intrinsic
+                ! Case insensitive version of the `index` intrinsic.
+                ! Technically just a subset of what `index` can do, but good enough for the present purpose.
+                ! 
+                ! Searches for substring in string, in a case insensitve way.
+                ! Returns the index of the start of the leftmost occurrence, or 0 if no occurrences are found.
                 character(len=*), intent(in)  :: string, substring
                 character(len=len(string))    :: tmp_str
                 character(len=len(substring)) :: tmp_sub
@@ -68,6 +76,10 @@ contains
         end function
 
         integer function find_start_of_next_word(string, word_idx) result(next_word_idx)
+                ! Scans through the input string, starting at `word_idx`, and:
+                ! 1. Skips any number of consecutive characters drawn from `validchars`.
+                ! 2. Skips any number of consecutive whitespaces.
+                ! 3. Returns the index of the next character found, or returns 0 if the end of the input string is hit
                 character(len=*), intent(in) :: string
                 integer, intent(in) :: word_idx
                 integer :: i, j
@@ -82,6 +94,8 @@ contains
         end function
 
         integer function find_end_of_word(string, word_idx) result(end_idx)
+                ! Returns the index of the end of a "word" inside `string` that starts at `word_idx`,
+                ! where a "word" is any number of consecutive characters drawn from `validchars` 
                 character(len=*), intent(in) :: string
                 integer, intent(in) :: word_idx
                 integer :: i, j
@@ -110,6 +124,7 @@ contains
                 do l = 1, n_template_lines
                         tmp = trim(template_lines(l))
                         inner_loop: do 
+                                ! replace our marker characters with either the debracketed type name or the actual type name.
                                 j = index(tmp, recordsep)
                                 if (j /= 0) tmp = tmp(1:j-1) // "_" // trim(debracketed_types(i)) // tmp(j+1:)
 
@@ -123,6 +138,9 @@ contains
         end subroutine
 
         subroutine find_instance_of_typesymbol(line, instance_start, instance_end)
+                ! given a line, find an instance of the type symbol, i.e. "type(T)" or whatever.
+                ! instance_start and instance_end are set to the first and last characters (i.e. "t" and ")")
+                ! both outputs set to zero if no instance found
                 character(len=*), intent(in) :: line
                 integer, intent(out) :: instance_start, instance_end
                 character(len=:), allocatable :: tmp
@@ -165,11 +183,11 @@ contains
                
                 if (state == NOT_IN_TEMPLATE) then 
                         ! We're not currently in a template block. 
-                        ! The only thing we need to look for is the start of a template block. 
+                        ! Look for the start of a template block.
 
                         i = ci_index(line, '!$template')
                         if (i /= 0 .and. i == index(line, '!')) then
-                                ! We found a temlate directive on this line, extract the type symbol
+                                ! We found a template directive on this line, extract the type symbol
                                 tmpstr = line(i:len(line))
                                 i = index(tmpstr, '(')
                                 if (i == 0) then
@@ -197,9 +215,9 @@ contains
                                 write(out_unit, "(A)") line
                         end if
                 elseif (state == IN_TEMPLATE_PROCNAME_UNKNOWN) then
-                        ! We are inside a template block
+                        ! We are inside a template block, but no "subroutine", "function" or "procedure" keyword yet
                         ! - We need to be on the lookout for a function, procedure, or subroutine keyword
-                        ! - An end template directive here would be unexpected
+                        ! - An end template directive here would be an error
 
                         ! first, look for an end template directive, and abort if we find one
                         i = ci_index(line, '!$end template')
@@ -256,7 +274,7 @@ contains
                         if (i /= 0 .and. i == index(line, '!')) then
                                 ! found an 'end template' directive
 
-                                ! echo out the template
+                                ! render out one instance of the template per type in our type file
                                 do j = 1, ntypes
                                         call write_template_instance(j, out_unit)
                                 end do
