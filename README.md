@@ -49,12 +49,12 @@ For example:
 The above template, combined with the example type file from above, would be processed into:
 
 ```
-	subroutine whatever_integer_int32(a,x,b,o)
+	subroutine whatever_integer_int32_(a,x,b,o)
 		integer(int32), intent(in)  :: a, x(:), b
 		integer(int32), intent(out) :: o(:)
 		o(:) = a*x(:) + b
 	end subroutine
-	subroutine whatever_real_real32(a,x,b,o)
+	subroutine whatever_real_real32_(a,x,b,o)
 		real(real32), intent(in)  :: a, x(:), b
 		real(real32), intent(out) :: o(:)
 		o(:) = a*x(:) + b
@@ -75,8 +75,8 @@ which would be rendered out to the following.
 
 ```
 interface whatever
-	subroutine whatever_integer_int32
-	subroutine whatever_real_real32
+	subroutine whatever_integer_int32_
+	subroutine whatever_real_real32_
 end interface
 ```
 
