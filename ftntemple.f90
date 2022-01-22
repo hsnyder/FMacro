@@ -99,7 +99,7 @@ contains
 
                 character(len=1000) :: fullmsg
                 write(fullmsg, "(A,I0,A)") "Line ", line_no, ": " // trim(message)
-                error stop fullmsg
+                error stop trim(fullmsg)
         end subroutine
 
         subroutine write_template_instance(i, out_unit)
