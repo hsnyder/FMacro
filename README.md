@@ -89,3 +89,7 @@ The use of the `procedure` keyword is supported for this purpose.
 - Function / subroutine names, as well as type symbols, must be drawn from the following set of characters:  abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_
 - The name of a function or subroutine to be templated needs to be on the same line as the "function", "subroutine" or "procedure" keyword (it cannot be on the next line, even if '&' is used)
 
+
+## Building
+
+FtnTemple is a single source file, just point your compiler at ftntemple.f90. 
