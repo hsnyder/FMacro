@@ -12,7 +12,7 @@ module m_ftntemple
 
         ! when we record a template, we substitute any type symbol occurences (e.g. `type(T)`) with ASCII char 26
         ! this makes it easier to render out the template instance (just search and replace a single char)
-        ! we also mark the end of the 'subroutine', 'procedure' or 'function' keyword with ASCII char 30 for a similar reason
+        ! we also mark the end of the procedure name with ASCII char 30 so we can easily suffix it with a type
         character, parameter :: substitute = achar(26)
         character, parameter :: recordsep  = achar(30)
 
