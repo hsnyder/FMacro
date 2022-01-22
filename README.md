@@ -31,7 +31,7 @@ A template block should enclose exactly one subroutine or function.
 Inside the parentheses following `!$template` is a symbol that stands in for a type. 
 For example, `!$template(T)` defines `T` to be a type parameter. 
 During preprocessing, the template will be duplicated once for each type in the type file, and 
-any ocurrences of `type(T)` inside the block will be replaced by the corresponding type.
+any occurrences of `type(T)` inside the block will be replaced by the corresponding type.
 The name of the output subroutine or function will be suffixed with a unique string that identifies the type.
 
 For example:
