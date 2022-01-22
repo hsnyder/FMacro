@@ -82,16 +82,16 @@ end interface
 
 The use of the `procedure` keyword is supported for this purpose.
 
-## Current Limitations
+## Limitations
 
 - Source file lines must be shorter than 256 characters (note this is well in excess of what the Fortran standard allows).
-- A maximum of 10,000 types is supported in a single type file.
-- A maximum of 100,000 source lines is supported per template block.
-- Source files containing ASCII character codes 26 or 30 will badly confuse the parser (though it would be rather odd to have those characters in your Fortran source file).
+- Maximum number of types in a type file: 10,000.
+- Maximum number of lines in a single template block: 100,000.
+- Source files containing ASCII character codes 26 or 30 will badly confuse the parser (these are invalid, nonprinting characters anyway, so this will probbaly never matter). 
 - Function / subroutine names, as well as type symbols, must be drawn from the following set of characters:  abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_
-- The name of a function or subroutine to be templated needs to be on the same line as the "function", "subroutine" or "procedure" keyword (it cannot be on the next line, even if '&' is used)
+- The name of a function or subroutine to be templated needs to be on the same line as the "function", "subroutine" or "procedure" keyword (it cannot be on the next line, even if '&' is used).
 
 
 ## Building
 
-FtnTemple is a single source file, just point your compiler at ftntemple.f90. 
+FtnTemple is a single source file, just point your compiler at `ftntemple.f90`. 
