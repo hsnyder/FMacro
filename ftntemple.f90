@@ -332,7 +332,7 @@ contains
                         close(tun)
                end block parse_type_list
 
-               hunt_for_template_blocks: block
+               parse_source_file: block
                         integer :: iun, ios, i
                         character(len=line_max_length) :: line
                         open(newunit=iun, file=inputfile_path, iostat=ios, status='old', action='read', form='formatted')
@@ -351,7 +351,7 @@ contains
                                 call process_single_input_line(trim(line),outunit,i)
                         end do
                         close(iun)
-               end block hunt_for_template_blocks
+               end block parse_source_file
         end function
 end module
 
