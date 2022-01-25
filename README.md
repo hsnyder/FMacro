@@ -5,7 +5,7 @@ Modern Fortran is an excellent language for scientific computing,
 but one of its shortcomings is the lack of strong support for generic programming. 
 FMacro aims to solve this through the use of a simple preprocessor,
 modeled after some of the language committee's early ideas for a 
-template language feature, to be included in a future Fortran standard. 
+template language feature.
 
 *Warning:* FMacro is currently alpha software.
 
