@@ -1,14 +1,14 @@
 
-!$template(T)
+!$macro(T)
     subroutine whatever(a,x,b,o)
        type(T), intent(in)  :: a, x(:), b
        type(T), intent(out) :: o(:)
        o(:) = a*x(:) + b
     end subroutine
-!$end template
+!$end macro
 
 interface whatever
-!$template(T)
+!$macro(T)
     subroutine whatever
-!$end template
+!$end macro
 end interface

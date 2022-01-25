@@ -1,17 +1,17 @@
-module m_ftntemple
+module m_fmacro
         implicit none
 
         integer, parameter :: type_max_length = 256 
         integer, parameter :: line_max_length = 256 
         integer, parameter :: max_types = 10000
-        integer, parameter :: max_template_lines = 100000
+        integer, parameter :: max_macro_lines = 100000
 
         integer, parameter :: notfound = line_max_length + 1
 
         character(len=*), parameter :: validchars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
 
-        ! when we record a template, we substitute any type symbol occurences (e.g. `type(T)`) with ASCII char 26
-        ! this makes it easier to render out the template instance (just search and replace a single char)
+        ! when we record a macro, we substitute any type symbol occurences (e.g. `type(T)`) with ASCII char 26
+        ! this makes it easier to render out the macro instance (just search and replace a single char)
         ! we also mark the end of the procedure name with ASCII char 30 so we can easily suffix it with a type
         character, parameter :: substitute = achar(26)
         character, parameter :: recordsep  = achar(30)
@@ -21,10 +21,10 @@ module m_ftntemple
         character(len=type_max_length) :: actual_types(max_types) 
         character(len=type_max_length) :: debracketed_types(max_types) 
 
-        ! Mutable module vars for storing information about the template the parser is currently parsing. 
-        integer :: n_template_lines = 0
+        ! Mutable module vars for storing information about the macro the parser is currently parsing. 
+        integer :: n_macro_lines = 0
         character(len=:), allocatable  :: typesymbol
-        character(len=line_max_length) :: template_lines(max_template_lines)
+        character(len=line_max_length) :: macro_lines(max_macro_lines)
 
 contains
         subroutine remove_brackets(instr, outstr)
@@ -116,13 +116,13 @@ contains
                 error stop trim(fullmsg)
         end subroutine
 
-        subroutine write_template_instance(i, out_unit)
+        subroutine write_macro_instance(i, out_unit)
                 integer, intent(in) :: out_unit, i
                 integer :: l, j, k
                 character(len=:), allocatable :: tmp
 
-                do l = 1, n_template_lines
-                        tmp = trim(template_lines(l))
+                do l = 1, n_macro_lines
+                        tmp = trim(macro_lines(l))
                         inner_loop: do 
                                 ! replace our marker characters with either the debracketed type name or the actual type name.
                                 j = index(tmp, recordsep)
@@ -176,53 +176,53 @@ contains
                 integer i, j, k, i3(3)
                 character(len=:), allocatable :: tmpstr
 
-                integer, parameter :: NOT_IN_TEMPLATE = 0
-                integer, parameter :: IN_TEMPLATE_PROCNAME_UNKNOWN = 1
-                integer, parameter :: IN_TEMPLATE_PROCNAME_KNOWN = 2
-                integer, save :: state = NOT_IN_TEMPLATE
+                integer, parameter :: NOT_IN_MACRO = 0
+                integer, parameter :: IN_MACRO_PROCNAME_UNKNOWN = 1
+                integer, parameter :: IN_MACRO_PROCNAME_KNOWN = 2
+                integer, save :: state = NOT_IN_MACRO
                
-                if (state == NOT_IN_TEMPLATE) then 
-                        ! We're not currently in a template block. 
-                        ! Look for the start of a template block.
+                if (state == NOT_IN_MACRO) then 
+                        ! We're not currently in a macro block. 
+                        ! Look for the start of a macro block.
 
-                        i = ci_index(line, '!$template')
+                        i = ci_index(line, '!$macro')
                         if (i /= 0 .and. i == index(line, '!')) then
-                                ! We found a template directive on this line, extract the type symbol
+                                ! We found a macro directive on this line, extract the type symbol
                                 tmpstr = line(i:len(line))
                                 i = index(tmpstr, '(')
                                 if (i == 0) then
-                                        call die(line_no, "Invalid template encountered (missing type symbol).")
+                                        call die(line_no, "Invalid macro encountered (missing type symbol).")
                                 end if 
 
                                 tmpstr = tmpstr(i+1:len(tmpstr))
                                 i = index(tmpstr, ')')
                                 if (i == 0) then
-                                        call die(line_no, "Invalid template encountered (unterminated type symbol).")
+                                        call die(line_no, "Invalid macro encountered (unterminated type symbol).")
                                 end if
 
                                 typesymbol = tmpstr(1:i-1)
                                 if(len(typesymbol) < 1) then
-                                        call die(line_no, "Invalid template encountered (empty type symbol).")
+                                        call die(line_no, "Invalid macro encountered (empty type symbol).")
                                 end if
 
                                 if (0 /= verify(typesymbol, validchars)) then
-                                        call die(line_no, "Invalid template type symbol (contains disallowed characters).")
+                                        call die(line_no, "Invalid macro type symbol (contains disallowed characters).")
                                 end if 
 
-                                state = IN_TEMPLATE_PROCNAME_UNKNOWN
+                                state = IN_MACRO_PROCNAME_UNKNOWN
                         else
-                                ! No template directive on this line, so just echo it. 
+                                ! No macro directive on this line, so just echo it. 
                                 write(out_unit, "(A)") line
                         end if
-                elseif (state == IN_TEMPLATE_PROCNAME_UNKNOWN) then
-                        ! We are inside a template block, but no "subroutine", "function" or "procedure" keyword yet
+                elseif (state == IN_MACRO_PROCNAME_UNKNOWN) then
+                        ! We are inside a macro block, but no "subroutine", "function" or "procedure" keyword yet
                         ! - We need to be on the lookout for a function, procedure, or subroutine keyword
-                        ! - An end template directive here would be an error
+                        ! - An end macro directive here would be an error
 
-                        ! first, look for an end template directive, and abort if we find one
-                        i = ci_index(line, '!$end template')
+                        ! first, look for an end macro directive, and abort if we find one
+                        i = ci_index(line, '!$end macro')
                         if (i /= 0 .and. i == index(line, '!')) then
-                                call die(line_no, "Unexpected end template directive (no procedure name found in template).")
+                                call die(line_no, "Unexpected end macro directive (no procedure name found in macro).")
                         end if 
 
                         ! then, search for "procedure", "subroutine" or "function"
@@ -237,9 +237,9 @@ contains
                                 ! found a function, procedure, or subroutine keyword
                                 ! record line, insert appropriate marker
 
-                                n_template_lines = n_template_lines + 1
-                                if (n_template_lines > max_template_lines) then
-                                        call die(line_no, "Limit on number of template lines exceeded.")
+                                n_macro_lines = n_macro_lines + 1
+                                if (n_macro_lines > max_macro_lines) then
+                                        call die(line_no, "Limit on number of macro lines exceeded.")
                                 end if
         
                                 ! need to find the procedure name  
@@ -250,50 +250,50 @@ contains
                                 tmpstr = line(1:k) // recordsep // line(k+1:)
 
                                 ! record the line
-                                template_lines(n_template_lines) = tmpstr
-                                state = IN_TEMPLATE_PROCNAME_KNOWN
+                                macro_lines(n_macro_lines) = tmpstr
+                                state = IN_MACRO_PROCNAME_KNOWN
                         else
                                 ! normal line
-                                n_template_lines = n_template_lines + 1
-                                if (n_template_lines > max_template_lines) then
-                                        call die(line_no, "Limit on number of template lines exceeded.")
+                                n_macro_lines = n_macro_lines + 1
+                                if (n_macro_lines > max_macro_lines) then
+                                        call die(line_no, "Limit on number of macro lines exceeded.")
                                 end if
                                 tmpstr = line
                                 call find_instance_of_typesymbol(line, j,k)
                                 if (j /= 0) then
                                         tmpstr = line(:j-1) // substitute // line(k+1:)
                                 end if
-                                template_lines(n_template_lines) = tmpstr
+                                macro_lines(n_macro_lines) = tmpstr
 
                         end if
-                elseif (state == IN_TEMPLATE_PROCNAME_KNOWN) then
-                        ! We are inside a template block
-                        ! - Need to be on the lookout for the end of the template
+                elseif (state == IN_MACRO_PROCNAME_KNOWN) then
+                        ! We are inside a macro block
+                        ! - Need to be on the lookout for the end of the macro
 
-                        i = ci_index(line, '!$end template')
+                        i = ci_index(line, '!$end macro')
                         if (i /= 0 .and. i == index(line, '!')) then
-                                ! found an 'end template' directive
+                                ! found an 'end macro' directive
 
-                                ! render out one instance of the template per type in our type file
+                                ! render out one instance of the macro per type in our type file
                                 do j = 1, ntypes
-                                        call write_template_instance(j, out_unit)
+                                        call write_macro_instance(j, out_unit)
                                 end do
 
                                 ! reset state
-                                state = NOT_IN_TEMPLATE
-                                n_template_lines = 0
+                                state = NOT_IN_MACRO
+                                n_macro_lines = 0
                         else
                                 ! normal line
-                                n_template_lines = n_template_lines + 1
-                                if (n_template_lines > max_template_lines) then
-                                        call die(line_no, "Limit on number of template lines exceeded.")
+                                n_macro_lines = n_macro_lines + 1
+                                if (n_macro_lines > max_macro_lines) then
+                                        call die(line_no, "Limit on number of macro lines exceeded.")
                                 end if
                                 tmpstr = line
                                 call find_instance_of_typesymbol(line, j,k)
                                 if (j /= 0) then
                                         tmpstr = line(:j-1) // substitute // line(k+1:)
                                 end if
-                                template_lines(n_template_lines) = tmpstr
+                                macro_lines(n_macro_lines) = tmpstr
 
                         end if
 
@@ -373,8 +373,8 @@ contains
         end function
 end module
 
-program ftntemple
-        use m_ftntemple, only: process
+program fmacro
+        use m_fmacro, only: process
         use iso_fortran_env, only: output_unit, error_unit
         implicit none
 
