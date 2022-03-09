@@ -7,7 +7,7 @@ FMacro aims to solve this through the use of a simple preprocessor,
 modeled after some of the language committee's early ideas for a 
 template language feature.
 
-*Warning:* FMacro is currently alpha software.
+*Warning:* FMacro is currently alpha software (but bug reports or contributions are welcome).
 
 ## Feature Summary
 
